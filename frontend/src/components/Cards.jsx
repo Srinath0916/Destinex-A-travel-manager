@@ -1,48 +1,37 @@
 import React from 'react';
 import './Cards.css';
-import PopularDestinationsIndia from "./PopularDestinationsIndia";
 import CardItem from './CardItem';
 
 function Cards() {
   return (
     <div className='cards'>
       
-      <PopularDestinationsIndia />
+     
       <h1 className='cards__title'>Check out these EPIC Destinations!</h1>
       <div className='cards__container'>
         <div className='cards__wrapper'>
           <ul className='cards__items'>
             <CardItem
-              src='images/img-9.jpg'
-              text='Explore the hidden waterfall deep inside the Amazon Jungle'
-              label='Adventure'
-              path='/services'
+              src='images/image-4.png'
+              text='Experience the majestic landscapes of Ladakh, where towering peaks and serene valleys create a breathtaking adventure.'
             />
             <CardItem
-              src='images/img-2.jpg'
-              text='Travel through the Islands of Bali in a Private Cruise'
-              label='Luxury'
-              path='/services'
+              src='images/image-2.png'
+              text='Stroll through the lush green hills of Munnar, Kerala.'
             />
           </ul>
           <ul className='cards__items'>
             <CardItem
-              src='images/img-3.jpg'
-              text='Set Sail in the Atlantic Ocean visiting Uncharted Waters'
-              label='Mystery'
-              path='/services'
+              src='images/image-3.png'
+              text='Unwind by the serene beaches and hidden lagoons of Goa.'
             />
             <CardItem
-              src='images/img-4.jpg'
-              text='Experience Football on Top of the Himilayan Mountains'
-              label='Adventure'
-              path='/products'
+              src='images/image-5.png'
+              text='Explore Karnataka’s stunning landscapes and rich heritage.'
             />
             <CardItem
-              src='images/img-8.jpg'
-              text='Ride through the Sahara Desert on a guided camel tour'
-              label='Adrenaline'
-              path='/sign-up'
+              src='images/image-6.png'
+              text='Experience the golden sands and vast dunes of the Thar Desert, where adventure meets timeless beauty.'
             />
             <div>
   

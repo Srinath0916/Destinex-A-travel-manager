@@ -86,13 +86,14 @@ video {
   outline: none;
   width: 300px;
   background-color: white;
+  color: #1c1919;
   box-shadow: 0 0 0 4px #8dff6d; /* matches the green border in the image */
 }
 
 .search-icon {
   position: absolute;
   left: 15px;
-  color: #444;
+  color: #1c1919;
 }
    .hero-tags {
   text-align: center;

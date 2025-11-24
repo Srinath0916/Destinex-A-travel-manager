@@ -148,14 +148,14 @@ body {
   text-transform: uppercase;
 }
 
-.btn:hover {
+.btn-login:hover {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
   color: var(--accent);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
-.btn:disabled {
+.btn-login:disabled {
   background: var(--border);
   color: var(--text-muted);
   cursor: not-allowed;
@@ -221,6 +221,7 @@ body {
   margin-bottom: 1rem;
   background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
 }
@@ -682,7 +683,7 @@ p {
   }
 }
 
-/* Sliding Overlay Panel Auth UI */
+/* Auth Super Container */
 .auth-super-container {
   position: relative;
   width: 100%;
@@ -720,23 +721,58 @@ p {
   100% { background-position: 100px 100px, -100px -100px, 0 0; }
 }
 
+/* Form Containers */
+.form-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  z-index: 20;
+}
+
+.form-container > * {
+  max-width: 300px;
+  padding: 0.7rem;
+  margin: 0.3rem auto;
+  border-radius: 1rem;
+  background: var(--form-bg-glass);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1;
+}
+
+.form-container:hover > * {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
 .sign-in-container {
   left: 0;
   opacity: 1;
   z-index: 20;
   transform: translateX(0);
 }
+
 .auth-super-container.right-panel-active .sign-in-container {
   transform: translateX(100%);
   opacity: 0;
   z-index: 10;
 }
+
 .sign-up-container {
   left: 50%;
   opacity: 0;
   z-index: 10;
   transform: translateX(0);
 }
+
 .auth-super-container.right-panel-active .sign-up-container {
   opacity: 1;
   z-index: 20;
@@ -754,6 +790,7 @@ p {
   z-index: 10;
   transition: transform 0.6s ease-in-out;
 }
+
 .overlay {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
   background-repeat: no-repeat;
@@ -767,12 +804,15 @@ p {
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
 }
+
 .auth-super-container.right-panel-active .overlay-container {
   transform: translateX(-100%);
 }
+
 .auth-super-container.right-panel-active .overlay {
   transform: translateX(50%);
 }
+
 .overlay-panel {
   position: absolute;
   top: 0;
@@ -787,19 +827,24 @@ p {
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
 }
+
 .overlay-left {
   transform: translateX(-20%);
 }
+
 .overlay-right {
   right: 0;
   transform: translateX(0);
 }
+
 .auth-super-container.right-panel-active .overlay-left {
   transform: translateX(0);
 }
+
 .auth-super-container.right-panel-active .overlay-right {
   transform: translateX(20%);
 }
+
 .overlay-panel h1 {
   font-size: 2rem;
   font-weight: 700;
@@ -807,12 +852,14 @@ p {
   color: var(--text-light);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .overlay-panel p {
   font-size: 0.95rem;
   line-height: 1.6;
   margin-bottom: 1.5rem;
   color: var(--text-muted);
 }
+
 .ghost-login {
   background: transparent;
   border: 2px solid var(--text-light);
@@ -826,10 +873,95 @@ p {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
 .ghost-login:hover {
   background: rgba(99, 102, 241, 0.1);
   color: var(--accent);
   transform: translateY(-2px);
+}
+
+/* Input styles */
+.input {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 0.5rem;
+  border: 1.5px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--background-alt);
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s, background 0.3s;
+  box-shadow: 0 2px 8px rgba(20,20,40,0.10) inset, 0 1.5px 4px rgba(99,102,241,0.04);
+  backdrop-filter: blur(2px);
+  font-weight: 500;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  background: rgba(55,48,163,0.18);
+  box-shadow: 0 0 0 2.5px var(--primary), 0 2px 8px rgba(99,102,241,0.10) inset;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+  font-size: 0.93rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+  font-style: italic;
+}
+
+/* Button styles */
+.btn-login {
+  width: 100%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: var(--text);
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.btn-login:hover {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-login:disabled {
+  background: var(--border);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input-eye-btn {
+  position: absolute;
+  right: 0.5rem;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #a5b4fc;
+  margin-bottom: 8px;
+  cursor: pointer;
+  padding: 0;
+  z-index: 2;
+}
+
+.input-eye-btn:focus {
+  outline: none;
 }
 
 /* Responsive */
@@ -849,6 +981,7 @@ p {
     padding: 0 1.5rem;
   }
 }
+
 @media (max-width: 700px) {
   .auth-super-container {
     max-width: 100%;
@@ -891,23 +1024,22 @@ p {
     max-width: 100vw;
     padding: 0.7rem;
   }
+} 
+
+/* Back Button Styling */
+.lucid-back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.2s ease;
 }
 
-.input-eye-btn {
-  position: absolute;
-  right: 0.5rem;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  color: #a5b4fc;
-  margin-bottom: 8px;
-  cursor: pointer;
-  padding: 0;
-  z-index: 2;
+.lucid-back-button:hover {
+  transform: scale(1.1); 
 }
-.input-eye-btn:focus {
-  outline: none;
-} 

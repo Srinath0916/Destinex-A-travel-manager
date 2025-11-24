@@ -1,6 +1,9 @@
 # Destinex
 
 Welcome to **Destinex**, your ultimate travel companion! Destinex is a tourist website designed to help you explore, plan, and experience unforgettable journeys.
+
+## Live Demo -: https://destinex-frontend.onrender.com
+
 ## About the Stack
 
 Destinex is built using the **MERN stack**, which includes:
@@ -44,5 +47,6 @@ This project is licensed under the [MIT License](LICENSE).
 ## Contact
 
 For inquiries or support, please email us at **support@destinex.com**.
+
 
 Happy Travels! 🌟

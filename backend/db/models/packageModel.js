@@ -14,7 +14,7 @@ const packageSchema = new mongoose.Schema({
         required: true
     },
     duration: {
-        type: Number,  // Duration in days
+        type: Number, 
         required: true
     },
     price: {
@@ -36,6 +36,11 @@ const packageSchema = new mongoose.Schema({
     }],
     category: {
         type: String,
+        required: true
+    },
+    groupType: {
+        type: String,
+        enum: ['Family', 'Solo', 'Couple', 'Friends'],
         required: true
     },
     maxGroupSize: {

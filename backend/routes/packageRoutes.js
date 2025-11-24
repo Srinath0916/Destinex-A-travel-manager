@@ -8,18 +8,18 @@ const {
     deletePackage,
     getPackagesByCategory,
     getPackagesByDifficulty,
-} = require('../controller/packageController');
-const { protect, admin } = require('../middleware/authMiddleware');
+} = require('../controller/packageController'); 
+// const { protect, admin } = require('../middleware/admin');          // need to add this middleware to protect the routes
 
 // Public routes
 router.route('/')
     .get(getPackages)
-    .post(protect, admin, createPackage);
+    .post(createPackage);
 
 router.route('/:id')
     .get(getPackageById)
-    .put(protect, admin, updatePackage)
-    .delete(protect, admin, deletePackage);
+    .put( updatePackage)
+    .delete( deletePackage);
 
 router.route('/category/:category')
     .get(getPackagesByCategory);

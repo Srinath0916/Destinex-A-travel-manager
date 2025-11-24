@@ -1,32 +1,28 @@
-// src/components/PopularLoc.jsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 import './PopularLoc.css';
 import { useNavigate } from 'react-router-dom';
 
 function PopularLoc({ onClose }) {
-  const [locations, setLocations] = useState([]);
+  const [destinations, setDestinations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/destination/places')
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : res.data.data;
-        if (Array.isArray(data)) {
-          setLocations(data);
-        } else {
-          throw new Error('Invalid response format');
-        }
+    axios.get('/destination/places')
+      .then(res => {
+        setDestinations(res.data.data || []);
+        setLoading(false);
       })
-      .catch((err) => {
-        console.error('Failed to fetch locations:', err);
-        setError('Could not load destinations.');
+      .catch(err => {
+        setError('Failed to load destinations');
+        setLoading(false);
       });
   }, []);
 
-  const filteredLocations = locations.filter((loc) =>
+  const filteredLocations = destinations.filter((loc) =>
     loc.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -47,7 +43,7 @@ function PopularLoc({ onClose }) {
       <h2 className="location-title">Pick your destination</h2>
       <input 
         type="text" 
-        className="location-search" 
+        className="location-search text-black" 
         placeholder="Search Indian cities..." 
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}

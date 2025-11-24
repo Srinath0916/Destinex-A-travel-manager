@@ -3,7 +3,7 @@ const Package = require('../db/models/packageModel');
 
 const createPlaces = async(req, res) => {
     try {
-        const { name, description, image, location, latitude, longitude, rating, reviews, category } = req.body;
+        const { name, description, image, location, latitude, longitude, rating, reviews, category, groupTypes } = req.body;
         const newDestination = new destinationSchema({
             name,
             description,
@@ -13,7 +13,8 @@ const createPlaces = async(req, res) => {
             longitude,
             rating,
             reviews,
-            category
+            category,
+            groupTypes: groupTypes || ['Couple', 'Family', 'Friends', 'Solo'] // Default to all group types if not specified
         });
         await newDestination.save();
         res.status(201).json({ message: 'Destination created successfully', data: newDestination });
@@ -47,7 +48,7 @@ const getPlaceById = async (req, res) => {
 const updatePlace = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, image, location, latitude, longitude, rating, reviews, category } = req.body;
+        const { name, description, image, location, latitude, longitude, rating, reviews, category, groupTypes } = req.body;
         const destination = await destinationSchema.findById(id);
         if (!destination || destination.isDeleted) {
             return res.status(404).json({ message: 'Destination not found' });
@@ -61,6 +62,7 @@ const updatePlace = async (req, res) => {
         destination.rating = rating || destination.rating;
         destination.reviews = reviews || destination.reviews;
         destination.category = category || destination.category;
+        destination.groupTypes = groupTypes || destination.groupTypes;
         await destination.save();
         res.status(200).json({ message: 'Destination updated successfully', data: destination });
     } catch (error) {
@@ -196,6 +198,39 @@ const getPackagesByDestinationId = async (req, res) => {
   }
 };
 
+const getPlacesByGroupType = async (req, res) => {
+    try {
+        const { groupType } = req.params;
+        const destinations = await destinationSchema.find({ groupTypes: groupType, isDeleted: false });
+        res.status(200).json({ 
+            message: destinations.length > 0 ? 'Destinations fetched successfully' : 'No destinations found for this group type',
+            data: destinations 
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching destinations', error: error.message });
+    }
+}
+
+const getPopularDestinations = async (req, res) => {
+    try {
+        // Get destinations with rating >= 4 and sort by number of reviews
+        const destinations = await destinationSchema.find({ 
+            rating: { $gte: 4 },
+            isDeleted: false 
+        }).sort({ reviews: -1 }).limit(8);
+        
+        res.status(200).json({ 
+            message: 'Popular destinations fetched successfully', 
+            data: destinations 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            message: 'Error fetching popular destinations', 
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     createPlaces,
     getAllPlaces,
@@ -211,4 +246,6 @@ module.exports = {
     getPlacesByNameAndCategory,
     getAllCities,
     getPackagesByDestinationId,
+    getPlacesByGroupType,
+    getPopularDestinations
 }

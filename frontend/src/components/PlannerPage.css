@@ -1,40 +1,23 @@
-.planner-page {
-  padding: 2rem;
-  text-align: center;
-}
-
-.duration-options {
+.planner-back-btn {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 10;
   display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 2rem;
-  flex-wrap: wrap;
-}
-
-.option {
-  background: #f2f2f2;
-  padding: 1rem 2rem;
-  border-radius: 15px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: background 0.3s;
-  position: relative;
-}
-
-.option:hover {
-  background: #ffe88f;
-}
-
-.highlighted {
-  background: #ffde59;
-}
-
-.badge {
-  background: green;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  font-size: 0.7rem;
-  padding: 2px 6px;
-  border-radius: 10px;
-  margin-left: 5px;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 16px rgba(102,126,234,0.15);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
 }
-
+.planner-back-btn:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 8px 24px rgba(102,126,234,0.22);
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import axios from '../utils/axios';
+import { useLocation, useNavigate } from 'react-router-dom';
+import FilterSection from '../pages/FilterSection';
 
 const Explore = () => {
   const [step, setStep] = useState(1); // 1: cities, 2: destinations, 3: packages
@@ -16,7 +17,7 @@ const Explore = () => {
   // Fetch all cities on mount
   useEffect(() => {
     setLoading(true);
-    axios.get('http://localhost:8000/cities')
+    axios.get('/cities')
       .then(res => {
         setCities(res.data.data || []);
         setLoading(false);
@@ -32,7 +33,7 @@ const Explore = () => {
     setSelectedCity(city);
     setStep(2);
     setLoading(true);
-    axios.get(`http://localhost:8000/cities/${city._id}/destinations`)
+    axios.get(`/cities/${city._id}/destinations`)
       .then(res => {
         setDestinations(res.data.data || []);
         setLoading(false);
@@ -48,7 +49,7 @@ const Explore = () => {
     setSelectedDestination(destination);
     setStep(3);
     setLoading(true);
-    axios.get(`http://localhost:8000/destination/destinations/${destination._id}/packages`)
+    axios.get(`/destination/destinations/${destination._id}/packages`)
       .then(res => {
         setPackages(res.data.data || []);
         setLoading(false);

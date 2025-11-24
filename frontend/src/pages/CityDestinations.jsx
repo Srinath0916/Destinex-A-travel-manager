@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 const CityDestinations = () => {
@@ -12,13 +12,15 @@ const CityDestinations = () => {
   const cityName = location.state?.cityName || 'Selected City';
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/cities/${cityId}/destinations`)
+    axios.get(`/cities/${cityId}/destinations`)
       .then(res => {
+        console.log("API response:", res);
         setDestinations(res.data.data || []);
         setLoading(false);
       })
-      .catch(() => {
-        setError('Failed to fetch destinations');
+      .catch((err) => {
+        console.error("API error:", err);
+        setError('Failed to fetch destiny');
         setLoading(false);
       });
   }, [cityId]);

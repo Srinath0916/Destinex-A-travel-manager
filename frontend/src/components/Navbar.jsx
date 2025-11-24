@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './Button';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import './Navbar.css';
+import { useAuth } from '../context/AuthContext';
+import axios from '../utils/axios';
 
 function Navbar() {
   const [click, setClick] = useState(false);
@@ -13,8 +14,19 @@ function Navbar() {
   const [destinations, setDestinations] = useState([]);
   const [activeCityId, setActiveCityId] = useState(null);
   const [loadingDest, setLoadingDest] = useState(false);
+  const [avatarEmoji, setAvatarEmoji] = useState('😊');
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const timeoutRef = useRef(null);
+  const profileTimeoutRef = useRef(null);
   const navigate = useNavigate();
+  const { isAuthenticated, logout, user } = useAuth();
+
+  const emojis = ['😊', '🌟', '🎯', '🎨', '🎭', '🎪', '🎡', '🎢', '🎠', '🎪', '🎨', '🎭', '🎪', '🎡', '🎢', '🎠'];
+
+  useEffect(() => {
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    setAvatarEmoji(randomEmoji);
+  }, []);
 
   const handleClick = () => setClick(!click);
   const closeMobileMenu = () => setClick(false);
@@ -22,22 +34,30 @@ function Navbar() {
   const showButton = () => setButton(window.innerWidth > 960);
 
   const toggleDropdown = () => {
-    setDropdownClicked((prev) => !prev);
-    setShowDropdown((prev) => !prev);
+    setDropdownClicked(prev => !prev);
+    setShowDropdown(prev => !prev);
+  };
+
+  const toggleProfileDropdown = () => {
+    setShowProfileDropdown(prev => !prev);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   // Fetch all cities for Explore dropdown
   useEffect(() => {
-    axios.get('http://localhost:8000/cities')
+    axios.get('/cities')
       .then(res => setCities(res.data.data || []))
       .catch(() => setCities([]));
   }, []);
 
-  // Fetch destinations for a city when hovered/clicked
   const handleCityHover = (cityId) => {
     setActiveCityId(cityId);
     setLoadingDest(true);
-    axios.get(`http://localhost:8000/cities/${cityId}/destinations`)
+    axios.get(`/cities/${cityId}/destinations`)
       .then(res => {
         setDestinations(res.data.data || []);
         setLoadingDest(false);
@@ -72,9 +92,7 @@ function Navbar() {
           <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
         </div>
         <ul className={click ? 'nav-menu active' : 'nav-menu'}>
-          <li className='nav-item'><Link to='/' className='nav-links' onClick={closeMobileMenu}>Home</Link></li>
-          <li className='nav-item'><Link to='/services' className='nav-links' onClick={closeMobileMenu}>Services</Link></li>
-          <li className='nav-item'><Link to='/products' className='nav-links' onClick={closeMobileMenu}>Products</Link></li>
+          
           <li
             className="nav-item relative"
             onMouseEnter={() => {
@@ -90,51 +108,86 @@ function Navbar() {
             }}
           >
             <button
-              className="nav-links bg-gradient-to-r from-pink-200 via-pink-100 to-green-200 text-green-700 font-small px-3 py-1 rounded-full transition-all text-sm"
+              className="nav-links explore-btn"
               onClick={toggleDropdown}
             >
-              Explore Destinations <i className="fas fa-chevron-down ml-1 text-xs"></i>
+              Explore Destinations <i className="fas fa-chevron-down"></i>
             </button>
             {showDropdown && cities.length > 0 && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-12 bg-white rounded-lg shadow-lg w-[700px] max-h-[600px] overflow-y-auto z-50 p-4 grid grid-cols-3 gap-4">
-                {cities.map((city) => (
-                  <div
-                    key={city._id}
-                    className="flex flex-col items-start group"
-                    onMouseEnter={() => handleCityHover(city._id)}
-                  >
-                    <span className='destination-list-dropdown font-semibold text-blue-700 cursor-pointer hover:underline'>{city.name}</span>
-                    {/* Show destinations for this city if active */}
-                    {activeCityId === city._id && (
-                      <div className="mt-2 ml-2 bg-gray-50 rounded shadow-lg p-2 w-56 max-h-60 overflow-y-auto border border-gray-200">
-                        {loadingDest ? (
-                          <div className="text-xs text-gray-400">Loading...</div>
-                        ) : destinations.length > 0 ? (
-                          destinations.map(dest => (
-                            <div
-                              key={dest._id}
-                              className="flex items-center justify-between px-2 py-1 hover:bg-blue-100 rounded cursor-pointer"
-                              onClick={() => handleDestinationClick(dest._id)}
-                            >
-                              <span className='text-gray-800'>{dest.name}</span>
-                              <span className={`text-xs font-medium px-2 py-1 rounded bg-gray-200 text-gray-700`}>
-                                {dest.category}
-                              </span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-xs text-gray-400">No destinations</div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className="destinations-dropdown absolute left-1/2 -translate-x-1/2 top-12 w-[700px] max-h-[600px] overflow-y-auto z-50">
+                <div className="destinations-grid">
+                  {cities.map((city) => (
+                    <div
+                      key={city._id}
+                      className="destination-item"
+                      onMouseEnter={() => handleCityHover(city._id)}
+                    >
+                      <span className='destination-list-dropdown'>{city.name}</span>
+                      {/* Show destinations for this city if active */}
+                      {activeCityId === city._id && (
+                        <div className="mt-2 ml-2 bg-white rounded-lg shadow-md p-2 w-56 max-h-60 overflow-y-auto border border-gray-100">
+                          {loadingDest ? (
+                            <div className="text-xs text-gray-400">Loading...</div>
+                          ) : destinations.length > 0 ? (
+                            destinations.map(dest => (
+                              <div
+                                key={dest._id}
+                                className="flex items-center justify-between px-2 py-1 hover:bg-blue-50 rounded cursor-pointer"
+                                onClick={() => handleDestinationClick(dest._id)}
+                              >
+                                <span className='text-gray-800'>{dest.name}</span>
+                                <span className="destination-category">
+                                  {dest.category}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-xs text-gray-400">No destinations</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </li>
-          <li><Link to='/login' className='nav-links-mobile' onClick={closeMobileMenu}>Login</Link></li>
         </ul>
-        {button && <Button buttonStyle='btn--outline'>Login</Button>}
+        <div className="navbar-right">
+          {isAuthenticated ? (
+            <div
+              className="profile-avatar"
+              onClick={toggleProfileDropdown}
+              onMouseEnter={() => {
+                if (profileTimeoutRef.current) clearTimeout(profileTimeoutRef.current);
+                setShowProfileDropdown(true);
+              }}
+              onMouseLeave={() => {
+                profileTimeoutRef.current = setTimeout(() => setShowProfileDropdown(false), 150);
+              }}
+            >
+              <div className="avatar-circle">
+                {avatarEmoji}
+              </div>
+              {showProfileDropdown && (
+                <div className="profile-dropdown">
+                  <div className="profile-menu">
+                    <Link to="/bookings" className="profile-menu-item" onClick={() => setShowProfileDropdown(false)}>
+                      <i className="fas fa-calendar-alt"></i> My Bookings
+                    </Link>
+                    <button onClick={handleLogout} className="profile-menu-item text-red-500">
+                      <i className="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            button && (
+              <Link to="/login"><Button buttonStyle='btn--outline'>Login</Button></Link>
+            )
+          )}
+        </div>
       </div>
     </nav>
   );

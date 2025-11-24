@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Login.css';
+import { useAuth } from '../context/AuthContext';
+import axios from '../utils/axios';
+
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
 
 const LoginPage = ({ setIsActive, showForgotPassword }) => {
   const [loginMethod, setLoginMethod] = useState('email');
@@ -20,6 +34,7 @@ const LoginPage = ({ setIsActive, showForgotPassword }) => {
   const [success, setSuccess] = useState('');
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -56,17 +71,45 @@ const LoginPage = ({ setIsActive, showForgotPassword }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/user/login-email', {
+      const response = await axios.post('/auth/login', {
         email: formData.email,
         password: formData.password
       });
       
+      console.log('Login response:', response.data); // Debug log
+      
       if (response.data.success) {
+        const token = response.data.Token || response.data.token;
+        if (!token) {
+          throw new Error('Invalid response format: missing token');
+        }
+
+        // Parse JWT token to get user data
+        const decodedToken = parseJwt(token);
+        console.log('Decoded token:', decodedToken); // Debug log
+
+        // Extract user data from token and response
+        const userData = {
+          _id: decodedToken?.userId || response.data.user?._id,
+          name: decodedToken?.name || response.data.user?.name,
+          email: formData.email,
+          phone: decodedToken?.phone || response.data.user?.phone || '',
+          role: decodedToken?.role || response.data.user?.role || 'user'
+        };
+
+        console.log('Processed user data:', userData); // Debug log
+        login(userData, token);
         setSuccess('Login successful! Redirecting...');
-        setTimeout(() => navigate('/'), 1000);
+        
+        // Get the redirect path from location state or default to home
+        const from = location.state?.from || '/';
+        setTimeout(() => navigate(from), 1000);
+      } else {
+        throw new Error(response.data.message || 'Login failed');
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', error); // Debug log
+      setError(error.response?.data?.message || error.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -84,7 +127,7 @@ const LoginPage = ({ setIsActive, showForgotPassword }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/user/send-otp', {
+      const response = await axios.post('/auth/send-otp', {
         phoneNumber: formData.phoneNumber
       });
       
@@ -111,21 +154,33 @@ const LoginPage = ({ setIsActive, showForgotPassword }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/user/verify-otp', {
+      const response = await axios.post('/auth/verify-otp', {
         phoneNumber: formData.phoneNumber,
         otp: formData.otp
       });
       
+      console.log('OTP verification response:', response.data); 
+      
       if (response.data.success) {
-        setSuccess('OTP verified successfully!');
         if (response.data.userExists) {
+          const token = response.data.Token || response.data.token;
+          if (!token) {
+            throw new Error('Invalid response format: missing token');
+          }
+          const user = parseJwt(token) || { name: 'User' };
+          login(user, token);
+          setSuccess('Login successful! Redirecting...');
           setTimeout(() => navigate('/'), 1000);
         } else {
+          setSuccess('OTP verified successfully!');
           setTimeout(() => navigate('/signup', { state: { phoneNumber: formData.phoneNumber } }), 1000);
         }
+      } else {
+        throw new Error(response.data.message || 'OTP verification failed');
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'OTP verification failed. Please try again.');
+      console.error('OTP verification error:', error); 
+      setError(error.response?.data?.message || error.message || 'OTP verification failed. Please try again.');
     } finally {
       setLoading(false);
     }

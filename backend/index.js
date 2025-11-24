@@ -1,29 +1,41 @@
 const express = require('express');
-const { connectDb }= require('./db/connection');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const config = require('./config');
 const userRouter = require('./routes/auth.route')
-const cors = require("cors")
-const dotenv = require('dotenv');
 const bookingRouter = require('./routes/bookingRoutes')
 const hotelRouter = require('./routes/hotelRoutes')
+const paymentRouter = require('./routes/paymentRoutes')
+
 const app = express();
-app.use(cors());
+
+// Middleware
 app.use(express.json());
+app.use(cors({
+  origin: Array.isArray(config.frontendURL) ? config.frontendURL : [config.frontendURL],
+  credentials: true
+}));
 
-dotenv.config();
-connectDb();
-app.get("/", (req,res) => {
-   res.status(200).json({success : true, message : "Server is running "})
-})
-app.use('/user', userRouter);
+// Connect to MongoDB
+mongoose.connect(config.mongoURI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
+// Routes
+app.use('/auth', userRouter);
 app.use('/destination', require('./routes/destinationRoutes'));
-
 app.use('/booking', bookingRouter);
-
 app.use('/hotel', hotelRouter);
-
 app.use('/cities', require('./routes/cityRoutes'));
+app.use('/packages', require('./routes/packageRoutes'));
+app.use('/payment', paymentRouter);
 
-app.listen(process.env.PORT, () => {
-   console.log(`Server is Running on http://localhost:${process.env.PORT}`);
-})
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Start server
+app.listen(config.port, () => {
+  console.log(`Server running on port ${config.port}`);
+});

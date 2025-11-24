@@ -15,7 +15,7 @@ function HeroSection() {
         <input
           type='text'
           placeholder='Search countries, cities'
-          className='search-input'
+          className='search-input text-black'
           readOnly // Prevent direct typing
         />
         <i className='fas fa-search search-icon'></i>

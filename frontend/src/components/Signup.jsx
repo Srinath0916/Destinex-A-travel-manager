@@ -1,25 +1,35 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
+import axios from '../utils/axios'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
-const Signup = ({ setIsActive, phoneNumber, onSignupSuccess }) => {
+const Signup = ({ setIsActive, onSignupSuccess }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { login } = useAuth();
     const [formData, setFormData ] = useState({
         userName: '',
         email: '',
         password: '',
         dob: '',
-        phoneNumber: phoneNumber || '',
+        phoneNumber: ''
     });
+
+    useEffect(() => {
+        if (location.state?.phoneNumber) {
+            setFormData(prev => ({
+                ...prev,
+                phoneNumber: location.state.phoneNumber
+            }));
+        }
+    }, [location.state]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0);
-
-    useEffect(() => {
-        setFormData(prev => ({ ...prev, phoneNumber: phoneNumber || '' }));
-    }, [phoneNumber]);
 
     const validateEmail = (email) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -65,6 +75,11 @@ const Signup = ({ setIsActive, phoneNumber, onSignupSuccess }) => {
             return false;
         }
 
+        if (!validatePhoneNumber(formData.phoneNumber)) {
+            setError('Please enter a valid phone number');
+            return false;
+        }
+
         if (passwordStrength < 3) {
             setError('Password is too weak. Please use a stronger password');
             return false;
@@ -72,11 +87,6 @@ const Signup = ({ setIsActive, phoneNumber, onSignupSuccess }) => {
 
         if (!formData.dob) {
             setError('Date of birth is required');
-            return false;
-        }
-
-        if (!validatePhoneNumber(formData.phoneNumber)) {
-            setError('Please enter a valid phone number');
             return false;
         }
 
@@ -94,16 +104,29 @@ const Signup = ({ setIsActive, phoneNumber, onSignupSuccess }) => {
 
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:8000/user/signup', formData);
+            const response = await axios.post('/auth/signup', formData);
 
             if (response.data.success) {
                 setSuccess('Account created successfully!');
-                if (onSignupSuccess) {
-                    onSignupSuccess(response.data.user);
-                }
+                // Store the token and user data
+                const token = response.data.Token;
+                const user = {
+                    userName: formData.userName,
+                    email: formData.email
+                };
+                login(user, token);
+                // Navigate to home page after a short delay
+                setTimeout(() => {
+                    navigate('/');
+                }, 1000);
             }
         } catch (error) {
-            setError(error.response?.data?.message || 'Signup failed. Please try again.');
+            const errorMessage = error.response?.data?.message;
+            if (errorMessage === 'All fields are required') {
+                setError('Please fill in all required fields: Name, Email, Password, and Date of Birth');
+            } else {
+                setError(errorMessage || 'Signup failed. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -192,6 +215,19 @@ const Signup = ({ setIsActive, phoneNumber, onSignupSuccess }) => {
                 </div>
 
                 <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Phone Number</label>
+                    <input
+                        type="tel"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        className="input"
+                        placeholder="Enter your phone number"
+                        required
+                    />
+                </div>
+
+                <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
                     <div className="relative">
                         <input
@@ -227,9 +263,6 @@ const Signup = ({ setIsActive, phoneNumber, onSignupSuccess }) => {
                     />
                 </div>
 
-                
-                
-                
                 <button
                     type="submit"
                     disabled={loading}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axios from '../utils/axios';
 
 const CityList = () => {
   const [cities, setCities] = useState([]);
@@ -9,7 +9,7 @@ const CityList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/cities')
+    axios.get('/destination/cities')
       .then(res => {
         setCities(res.data.data || []);
         setLoading(false);

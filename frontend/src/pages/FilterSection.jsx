@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 
 const categories = ['Luxury', 'Adventure', 'Budget', 'Popular', 'Romantic', 'Modern'];
 const ratings = [5, 4, 3, 2];
@@ -11,14 +11,14 @@ const FilterSection = ({ setDestinations }) => {
 
   const fetchFilteredData = async () => {
     try {
-      let url = 'http://localhost:8000/destination/places';
+      let url = '/destination/places';
 
       if (selectedCategory && selectedRating) {
-        url = `http://localhost:8000/destination/places/category/${selectedCategory}/rating/${selectedRating}`;
+        url = `/destination/places/category/${selectedCategory}/rating/${selectedRating}`;
       } else if (selectedCategory) {
-        url = `http://localhost:8000/destination/places/category/${selectedCategory}`;
+        url = `/destination/places/category/${selectedCategory}`;
       } else if (selectedRating) {
-        url = `http://localhost:8000/destination/places/rating/${selectedRating}`;
+        url = `/destination/places/rating/${selectedRating}`;
       }
 
       const res = await axios.get(url);

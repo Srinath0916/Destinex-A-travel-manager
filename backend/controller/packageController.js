@@ -1,12 +1,13 @@
 const Package = require('../db/models/packageModel');
 const asyncHandler = require('express-async-handler');
+const mongoose = require('mongoose');
 
 // @desc    Create a new package
 // @route   POST /api/packages
 // @access  Private/Admin
 const createPackage = asyncHandler(async (req, res) => {
-    const package = new Package(req.body);
-    const createdPackage = await package.save();
+    const newPackage = new Package(req.body);
+    const createdPackage = await newPackage.save();
     res.status(201).json(createdPackage);
 });
 
@@ -39,9 +40,18 @@ const getPackages = asyncHandler(async (req, res) => {
 // @route   GET /api/packages/:id
 // @access  Public
 const getPackageById = asyncHandler(async (req, res) => {
-    const package = await Package.findOne({ _id: req.params.id, isDeleted: false });
-    if (package) {
-        res.json(package);
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400);
+        throw new Error('Invalid package ID format');
+    }
+
+    const packageData = await Package.findOne({ _id: id, isDeleted: false });
+  
+
+    if (packageData) {
+        res.json(packageData);
     } else {
         res.status(404);
         throw new Error('Package not found');
@@ -52,37 +62,30 @@ const getPackageById = asyncHandler(async (req, res) => {
 // @route   PUT /api/packages/:id
 // @access  Private/Admin
 const updatePackage = asyncHandler(async (req, res) => {
-    const {
-        name,
-        description,
-        image,
-        duration,
-        price,
-        inclusions,
-        exclusions,
-        itinerary,
-        category,
-        maxGroupSize,
-        difficulty,
-    } = req.body;
+    const { id } = req.params;
 
-    const package = await Package.findOne({ _id: req.params.id, isDeleted: false });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400);
+        throw new Error('Invalid package ID format');
+    }
 
-    if (package) {
-        package.name = name || package.name;
-        package.description = description || package.description;
-        package.image = image || package.image;
-        package.duration = duration || package.duration;
-        package.price = price || package.price;
-        package.inclusions = inclusions || package.inclusions;
-        package.exclusions = exclusions || package.exclusions;
-        package.itinerary = itinerary || package.itinerary;
-        package.category = category || package.category;
-        package.maxGroupSize = maxGroupSize || package.maxGroupSize;
-        package.difficulty = difficulty || package.difficulty;
-        package.updatedAt = Date.now();
+    const pkg = await Package.findOne({ _id: id, isDeleted: false });
 
-        const updatedPackage = await package.save();
+    if (pkg) {
+        const fields = [
+            'name', 'description', 'image', 'duration', 'price', 'inclusions',
+            'exclusions', 'itinerary', 'category', 'maxGroupSize', 'difficulty'
+        ];
+
+        fields.forEach(field => {
+            if (req.body[field] !== undefined) {
+                pkg[field] = req.body[field];
+            }
+        });
+
+        pkg.updatedAt = Date.now();
+
+        const updatedPackage = await pkg.save();
         res.json(updatedPackage);
     } else {
         res.status(404);
@@ -94,11 +97,18 @@ const updatePackage = asyncHandler(async (req, res) => {
 // @route   DELETE /api/packages/:id
 // @access  Private/Admin
 const deletePackage = asyncHandler(async (req, res) => {
-    const package = await Package.findOne({ _id: req.params.id, isDeleted: false });
+    const { id } = req.params;
 
-    if (package) {
-        package.isDeleted = true;
-        await package.save();
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400);
+        throw new Error('Invalid package ID format');
+    }
+
+    const pkg = await Package.findOne({ _id: id, isDeleted: false });
+
+    if (pkg) {
+        pkg.isDeleted = true;
+        await pkg.save();
         res.json({ message: 'Package removed' });
     } else {
         res.status(404);
@@ -132,10 +142,19 @@ const getPackagesByDifficulty = asyncHandler(async (req, res) => {
 // @route   GET /api/packages/destination/:destinationId
 // @access  Public
 const getPackagesByDestination = asyncHandler(async (req, res) => {
+    const { destinationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(destinationId)) {
+        res.status(400);
+        throw new Error('Invalid destination ID format');
+    }
+
     const packages = await Package.find({
-        destination: req.params.destinationId,
+        destination: destinationId,
         isDeleted: false
     });
+   
+
     res.json(packages);
 });
 
@@ -148,4 +167,4 @@ module.exports = {
     getPackagesByCategory,
     getPackagesByDifficulty,
     getPackagesByDestination,
-}; 
+};

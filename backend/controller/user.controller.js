@@ -67,19 +67,26 @@ const signup = async (req, res) => {
     try {
         const { phoneNumber, userName, email, password, dob } = req.body;
 
-        if(!phoneNumber || !userName || !email || !password || !dob) return res.status(400).json({success:false,message:"All fields are required"});
+        if(!userName || !email || !password || !dob) return res.status(400).json({success:false,message:"Name, email, password and date of birth are required"});
 
-        const existingUserByPhone = await User.findOne({ phoneNumber });
-        if(existingUserByPhone) return res.status(400).json({success:false,message:"User Already Exists"});
+        if(phoneNumber) {
+            const existingUserByPhone = await User.findOne({ phoneNumber });
+            if(existingUserByPhone) return res.status(400).json({success:false,message:"Phone number already registered"});
+        }
 
         const existingUserByEmail = await User.findOne({ email });
-        if(existingUserByEmail) return res.status(400).json({success:false,message:"User already exists"});
+        if(existingUserByEmail) return res.status(400).json({success:false,message:"Email already registered"});
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-
-        const user = new User({ phoneNumber, userName, email, password: hashedPassword, dob: new Date(dob) });
+        const user = new User({ 
+            phoneNumber, 
+            userName, 
+            email, 
+            password: hashedPassword, 
+            dob: new Date(dob) 
+        });
 
         await user.save();
 

@@ -55,4 +55,5 @@ const destinationSchema = new mongoose.Schema({
     default: false,
   },
 });
+
 module.exports = mongoose.model('Destination', destinationSchema);
